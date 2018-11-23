@@ -6,8 +6,8 @@
 # Datatypes (KEYWORD1)
 #######################################
 
-TasmotaMqtt.h	KEYWORD1
-TasmotaMqtt	KEYWORD1
+MqttWrapperV2.h	KEYWORD1
+MqttWrapperV2	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)

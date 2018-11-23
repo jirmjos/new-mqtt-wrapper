@@ -1,5 +1,5 @@
 /*
-  TasmotaMqtt.cpp - Wrapper for mqtt for esp8266 by Tuan PM for Tasmota
+  MqttWrapperV2.cpp - Wrapper for mqtt for esp8266 by Tuan PM for Tasmota
 
   Copyright (C) 2018 Theo Arends and Ingo Randolf
 
@@ -17,7 +17,7 @@
   along with this program.        If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "TasmotaMqtt.h"
+#include "MqttWrapperV2.h"
 
 #include "JustWifi.h"
 
@@ -42,7 +42,7 @@
 static void mqttConnectedCb(uint32_t *args)
 {
         MQTT_Client* client = (MQTT_Client*)args;
-        TasmotaMqtt* _this = (TasmotaMqtt*)client->user_data;
+        MqttWrapperV2* _this = (MqttWrapperV2*)client->user_data;
         Serial.println("MQTT connected");
         if (_this) _this->_onMqttConnectedCb();
 }
@@ -50,35 +50,35 @@ static void mqttConnectedCb(uint32_t *args)
 static void mqttDisconnectedCb(uint32_t *args)
 {
         MQTT_Client* client = (MQTT_Client*)args;
-        TasmotaMqtt* _this = (TasmotaMqtt*)client->user_data;
+        MqttWrapperV2* _this = (MqttWrapperV2*)client->user_data;
         if (_this && _this->onMqttDisconnectedCb) _this->onMqttDisconnectedCb();
 }
 
 static void mqttPublishedCb(uint32_t *args)
 {
         MQTT_Client* client = (MQTT_Client*)args;
-        TasmotaMqtt* _this = (TasmotaMqtt*)client->user_data;
+        MqttWrapperV2* _this = (MqttWrapperV2*)client->user_data;
         if (_this && _this->onMqttPublishedCb) _this->onMqttPublishedCb();
 }
 
 static void mqttTimeoutCb(uint32_t *args)
 {
         MQTT_Client* client = (MQTT_Client*)args;
-        TasmotaMqtt* _this = (TasmotaMqtt*)client->user_data;
+        MqttWrapperV2* _this = (MqttWrapperV2*)client->user_data;
         if (_this && _this->onMqttTimeoutCb) _this->onMqttTimeoutCb();
 }
 
 static void mqttDataCb(uint32_t *args, const char* topic, uint32_t topic_len, const char *data, uint32_t data_len)
 {
         MQTT_Client* client = (MQTT_Client*)args;
-        TasmotaMqtt* _this = (TasmotaMqtt*)client->user_data;
+        MqttWrapperV2* _this = (MqttWrapperV2*)client->user_data;
         if (_this) _this->_onMqttDataCb(topic, topic_len, data, data_len);
 }
 
 //wifi internal callback
 static void wifiCb(justwifi_messages_t code, char * parameter, void* user_data)
 {
-        TasmotaMqtt* _this = (TasmotaMqtt*)user_data;
+        MqttWrapperV2* _this = (MqttWrapperV2*)user_data;
         if (_this) _this->_onWifiCb(code, parameter);
 }
 
@@ -116,10 +116,10 @@ static void infoWifi() {
 }
 
 /*********************************************************************************************\
- * TasmotaMqtt class implementation
+ * MqttWrapperV2 class implementation
 \*********************************************************************************************/
 
-TasmotaMqtt::TasmotaMqtt() :
+MqttWrapperV2::MqttWrapperV2() :
         onMqttConnectedCb(0),
         onMqttDisconnectedCb(0),
         onMqttPublishedCb(0),
@@ -128,12 +128,12 @@ TasmotaMqtt::TasmotaMqtt() :
 {
 }
 
-TasmotaMqtt::~TasmotaMqtt()
+MqttWrapperV2::~MqttWrapperV2()
 {
         MQTT_DeleteClient(&mqttClient);
 }
 
-void TasmotaMqtt::_onMqttConnectedCb()
+void MqttWrapperV2::_onMqttConnectedCb()
 {
         Serial.println("MQTT connected");
         char lwtTopic[512];
@@ -142,7 +142,7 @@ void TasmotaMqtt::_onMqttConnectedCb()
         if (onMqttConnectedCb) onMqttConnectedCb();
 }
 
-void TasmotaMqtt::_onWifiCb(justwifi_messages_t code, char * parameter)
+void MqttWrapperV2::_onWifiCb(justwifi_messages_t code, char * parameter)
 {
         switch(code) {
                 case MESSAGE_TURNING_OFF:
@@ -220,7 +220,7 @@ void TasmotaMqtt::_onWifiCb(justwifi_messages_t code, char * parameter)
                         break;
         }
 }
-void TasmotaMqtt::start(struct mqtt_wrapper_options* newOptions)
+void MqttWrapperV2::start(struct mqtt_wrapper_options* newOptions)
 {
         options = newOptions;
         // Set WIFI hostname (otherwise it would be ESP-XXXXXX)
@@ -265,12 +265,12 @@ void TasmotaMqtt::start(struct mqtt_wrapper_options* newOptions)
         Subscribe(options->deviceTopic);
 }
 
-void TasmotaMqtt::loop()
+void MqttWrapperV2::loop()
 {
         jw.loop();
 }
 
-void TasmotaMqtt::InitConnection(const char* host, uint32_t port, uint8_t security)
+void MqttWrapperV2::InitConnection(const char* host, uint32_t port, uint8_t security)
 {
         MQTT_InitConnection(&mqttClient, (uint8_t*)host, port, security);
 
@@ -284,86 +284,86 @@ void TasmotaMqtt::InitConnection(const char* host, uint32_t port, uint8_t securi
         MQTT_OnData(&mqttClient, mqttDataCb);
 }
 
-void TasmotaMqtt::InitClient(const char* client_id, const char* client_user, const char* client_pass, uint32_t keep_alive_time, uint8_t clean_session)
+void MqttWrapperV2::InitClient(const char* client_id, const char* client_user, const char* client_pass, uint32_t keep_alive_time, uint8_t clean_session)
 {
         MQTT_InitClient(&mqttClient, (uint8_t*)client_id, (uint8_t*)client_user, (uint8_t*)client_pass, keep_alive_time, clean_session);
 }
 
-void TasmotaMqtt::DeleteClient()
+void MqttWrapperV2::DeleteClient()
 {
         MQTT_DeleteClient(&mqttClient);
 }
 
-void TasmotaMqtt::InitLWT(const char* will_topic, const char* will_msg, uint8_t will_qos, bool will_retain)
+void MqttWrapperV2::InitLWT(const char* will_topic, const char* will_msg, uint8_t will_qos, bool will_retain)
 {
         MQTT_InitLWT(&mqttClient, (uint8_t*)will_topic, (uint8_t*)will_msg, will_qos, (uint8_t)will_retain);
 }
 
-void TasmotaMqtt::OnConnected( void (*function)(void) )
+void MqttWrapperV2::OnConnected( void (*function)(void) )
 {
         onMqttConnectedCb = function;
 }
 
-void TasmotaMqtt::OnDisconnected( void (*function)(void) )
+void MqttWrapperV2::OnDisconnected( void (*function)(void) )
 {
         onMqttDisconnectedCb = function;
 }
 
-void TasmotaMqtt::OnPublished( void (*function)(void) )
+void MqttWrapperV2::OnPublished( void (*function)(void) )
 {
         onMqttPublishedCb = function;
 }
 
-void TasmotaMqtt::OnTimeout( void (*function)(void) )
+void MqttWrapperV2::OnTimeout( void (*function)(void) )
 {
         onMqttTimeoutCb = function;
 }
 
-void TasmotaMqtt::OnData( void (*function)(char*, uint8_t*, unsigned int) )
+void MqttWrapperV2::OnData( void (*function)(char*, uint8_t*, unsigned int) )
 {
         onMqttDataCb = function;
 }
 
-bool TasmotaMqtt::Subscribe(const char* topic, uint8_t qos)
+bool MqttWrapperV2::Subscribe(const char* topic, uint8_t qos)
 {
         return MQTT_Subscribe(&mqttClient, (char*)topic, qos);
 }
 
-bool TasmotaMqtt::Unsubscribe(const char* topic)
+bool MqttWrapperV2::Unsubscribe(const char* topic)
 {
         return MQTT_UnSubscribe(&mqttClient, (char*)topic);
 }
 
-void TasmotaMqtt::Connect()
+void MqttWrapperV2::Connect()
 {
         MQTT_Connect(&mqttClient);
 }
 
-void TasmotaMqtt::Connect(const char* client_id, const char* client_user, const char* client_pass, const char* will_topic, const char* will_msg, uint8_t will_qos, bool will_retain)
+void MqttWrapperV2::Connect(const char* client_id, const char* client_user, const char* client_pass, const char* will_topic, const char* will_msg, uint8_t will_qos, bool will_retain)
 {
         MQTT_InitClient(&mqttClient, (uint8_t*)client_id, (uint8_t*)client_user, (uint8_t*)client_pass, MQTT_KEEPALIVE, 1);
         MQTT_InitLWT(&mqttClient, (uint8_t*)will_topic, (uint8_t*)will_msg, will_qos, (uint8_t)will_retain);
         MQTT_Connect(&mqttClient);
 }
 
-void TasmotaMqtt::Disconnect()
+void MqttWrapperV2::Disconnect()
 {
         MQTT_Disconnect(&mqttClient);
 }
 
-bool TasmotaMqtt::Publish(const char* topic, const char* data, bool retain, int qos)
+bool MqttWrapperV2::Publish(const char* topic, const char* data, bool retain, int qos)
 {
         return MQTT_Publish(&mqttClient, topic, data, strlen(data), qos, (int)retain);
 }
 
-bool TasmotaMqtt::Connected()
+bool MqttWrapperV2::Connected()
 {
         return (mqttClient.connState > TCP_CONNECTED);
 }
 
 /*********************************************************************************************/
 
-void TasmotaMqtt::_onMqttDataCb(const char* topic, uint32_t topic_len, const char* data, uint32_t data_len)
+void MqttWrapperV2::_onMqttDataCb(const char* topic, uint32_t topic_len, const char* data, uint32_t data_len)
 {
         char topic_copy[topic_len +1];
 

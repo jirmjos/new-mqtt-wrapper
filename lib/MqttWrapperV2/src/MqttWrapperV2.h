@@ -1,5 +1,5 @@
 /*
-  TasmotaMqtt.h - Wrapper for mqtt for esp8266 by Tuan PM for Tasmota
+  MqttWrapperV2.h - Wrapper for mqtt for esp8266 by Tuan PM for Tasmota
 
   Copyright (C) 2018 Theo Arends and Ingo Randolf
 
@@ -17,10 +17,10 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef TasmotaMqtt_h
-#define TasmotaMqtt_h
+#ifndef MqttWrapperV2_h
+#define MqttWrapperV2_h
 /*********************************************************************************************\
- * TasmotaMqtt supports currently only non-TLS MQTT
+ * MqttWrapperV2 supports currently only non-TLS MQTT
  *
  * Adapted from esp-mqtt-arduino by Ingo Randolf (https://github.com/i-n-g-o/esp-mqtt-arduino)
 \*********************************************************************************************/
@@ -63,10 +63,10 @@ struct mqtt_wrapper_options {
         void (*mqttDataCB)(char* topic, uint8_t* payload, unsigned int length);
 };
 
-class TasmotaMqtt {
+class MqttWrapperV2 {
 public:
-        TasmotaMqtt();
-        ~TasmotaMqtt();
+        MqttWrapperV2();
+        ~MqttWrapperV2();
 
         void start(struct mqtt_wrapper_options* options);
 
@@ -112,4 +112,4 @@ private:
         struct mqtt_wrapper_options* options;
 };
 
-#endif  // TasmotaMqtt_h
+#endif  // MqttWrapperV2_h

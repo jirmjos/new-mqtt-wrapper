@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <TasmotaMqtt.h>
+#include <MqttWrapperV2.h>
 
 #ifndef NAME
 #define NAME "NEW-sensor-test"
@@ -25,7 +25,7 @@
 #define MQTT_PORT 1883
 #endif
 
-TasmotaMqtt wrapper;
+MqttWrapperV2 wrapper;
 struct mqtt_wrapper_options mqtt_options;
 
 void setup()

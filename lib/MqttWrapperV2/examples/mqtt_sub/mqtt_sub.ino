@@ -1,5 +1,5 @@
 #include <ESP8266WiFi.h>
-#include <TasmotaMqtt.h>
+#include <MqttWrapperV2.h>
 
 // This needs testing
 
@@ -12,7 +12,7 @@ void myConnectedCb();
 #define TOPIC "/client1/value"
 
 // create MQTT
-TasmotaMqtt myMqtt();
+MqttWrapperV2 myMqtt();
 
 const char* ssid     = "ssid";
 const char* password = "ssid_password";
